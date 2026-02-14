@@ -122,6 +122,19 @@
                                 </select>
                             </div>
 
+                            <!-- Payment Method -->
+                            <div>
+                                <label for="payment_method" class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <template x-for="method in ['Cash', 'Transfer', 'VA', 'QRIS']">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="payment_method" :value="method" x-model="paymentMethod" class="hidden peer" required>
+                                            <div class="px-3 py-2 text-center text-sm border border-slate-200 rounded-lg peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-600 hover:bg-slate-50 transition-all" x-text="method"></div>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+
                             <!-- Summary -->
                             <div class="p-4 bg-slate-50 rounded-xl space-y-2">
                                 <div class="flex justify-between text-sm text-slate-500">
@@ -157,6 +170,7 @@
     function posSystem() {
         return {
             cart: [],
+            paymentMethod: 'Cash',
             showModal: false,
             get total() {
                 return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);

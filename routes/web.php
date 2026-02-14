@@ -23,6 +23,7 @@ Route::get('/', function () {
 });
 
 Route::resource('products', ProductController::class);
+Route::post('products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
 Route::resource('customers', CustomerController::class);
 
 Route::get('/pos', [POSController::class, 'index'])->name('pos.index');

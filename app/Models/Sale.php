@@ -13,6 +13,7 @@ class Sale extends Model
         'customer_id',
         'total_amount',
         'total_items',
+        'payment_method',
     ];
 
     public function customer()

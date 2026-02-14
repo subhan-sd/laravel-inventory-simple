@@ -25,33 +25,46 @@ class POSController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'customer_id' => 'nullable|exists:customers,id',
+            'payment_method' => 'required|string|in:Cash,Transfer,VA,QRIS',
         ]);
 
         return DB::transaction(function () use ($request) {
             $totalAmount = 0;
             $totalItems = 0;
 
-            $sale = Sale::create([
+            $sale = \App\Models\Sale::create([
                 'customer_id' => $request->customer_id,
                 'total_amount' => 0,
                 'total_items' => 0,
+                'payment_method' => $request->payment_method,
             ]);
 
             foreach ($request->items as $itemData) {
-                $product = Product::lockForUpdate()->find($itemData['product_id']);
+                $product = \App\Models\Product::lockForUpdate()->find($itemData['product_id']);
 
                 if ($product->stock < $itemData['quantity']) {
                     throw new \Exception("Insufficient stock for {$product->name}");
                 }
 
+                $previousStock = $product->stock;
                 $subtotal = $product->price * $itemData['quantity'];
                 
-                SaleItem::create([
+                \App\Models\SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
                     'quantity' => $itemData['quantity'],
                     'price' => $product->price,
                     'subtotal' => $subtotal,
+                ]);
+
+                // Create Stock Adjustment Record
+                \App\Models\StockAdjustment::create([
+                    'product_id' => $product->id,
+                    'type' => 'out',
+                    'quantity' => $itemData['quantity'],
+                    'reason' => "Sale #{$sale->id}",
+                    'previous_stock' => $previousStock,
+                    'current_stock' => $previousStock - $itemData['quantity'],
                 ]);
 
                 $product->decrement('stock', $itemData['quantity']);
@@ -66,7 +79,7 @@ class POSController extends Controller
             ]);
 
             return redirect()->route('pos.index')
-                ->with('success', "Order #{$sale->id} completed successfully for Rp" . number_format($totalAmount, 0, '.', ','));
+                ->with('success', "Order #{$sale->id} via {$request->payment_method} completed successfully for Rp" . number_format($totalAmount, 0, '.', ','));
         });
     }
 }

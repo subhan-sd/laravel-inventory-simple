@@ -16,4 +16,9 @@ class Product extends Model
         'stock',
         'category',
     ];
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
+    }
 }

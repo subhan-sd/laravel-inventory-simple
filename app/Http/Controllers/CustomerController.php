@@ -33,6 +33,12 @@ class CustomerController extends Controller
             ->with('success', 'Customer added successfully.');
     }
 
+    public function show(Customer $customer)
+    {
+        $sales = $customer->sales()->with('items.product')->latest()->paginate(10);
+        return view('customers.show', compact('customer', 'sales'));
+    }
+
     public function edit(Customer $customer)
     {
         return view('customers.edit', compact('customer'));

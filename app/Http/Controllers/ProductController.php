@@ -48,7 +48,45 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return view('products.show', compact('product'));
+        $adjustments = $product->stockAdjustments()->latest()->paginate(10);
+        return view('products.show', compact('product', 'adjustments'));
+    }
+
+    public function adjustStock(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:in,out,adjustment',
+            'quantity' => 'required|integer|min:1',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $previousStock = $product->stock;
+        
+        if ($validated['type'] === 'in') {
+            $currentStock = $previousStock + $validated['quantity'];
+        } elseif ($validated['type'] === 'out') {
+            if ($previousStock < $validated['quantity']) {
+                return back()->with('error', 'Insufficient stock for this reduction.');
+            }
+            $currentStock = $previousStock - $validated['quantity'];
+        } else {
+            // Manual sync/adjustment
+            $currentStock = $validated['quantity'];
+        }
+
+        \App\Models\StockAdjustment::create([
+            'product_id' => $product->id,
+            'type' => $validated['type'],
+            'quantity' => $validated['quantity'],
+            'reason' => $validated['reason'] ?? 'Manual Adjustment',
+            'previous_stock' => $previousStock,
+            'current_stock' => $currentStock,
+        ]);
+
+        $product->update(['stock' => $currentStock]);
+
+        return redirect()->route('products.show', $product)
+            ->with('success', 'Stock adjusted successfully.');
     }
 
     /**
