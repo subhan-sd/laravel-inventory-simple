@@ -19,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (!app()->runningInConsole()) {
+            \Illuminate\Support\Facades\View::composer('layouts.app', function ($view) {
+                if (auth()->check()) {
+                    $lowStockProducts = \App\Models\Product::where('stock', '<', 10)->latest()->get();
+                    $view->with('notifications', $lowStockProducts);
+                }
+            });
+        }
     }
 }

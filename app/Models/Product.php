@@ -21,4 +21,9 @@ class Product extends Model
     {
         return $this->hasMany(StockAdjustment::class);
     }
+
+    public function priceHistories()
+    {
+        return $this->hasMany(PriceHistory::class);
+    }
 }

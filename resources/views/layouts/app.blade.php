@@ -112,14 +112,64 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button class="p-2 relative text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                        <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
-                    <div class="h-8 w-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold border border-brand-200 cursor-pointer">
-                        US
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="p-2 relative text-slate-500 hover:bg-slate-50 rounded-full transition-colors group">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                            @if(isset($notifications) && $notifications->count() > 0)
+                                <span class="absolute top-2 right-2.5 w-4 h-4 bg-red-600 text-white text-[10px] font-bold rounded-full border-2 border-white flex items-center justify-center">
+                                    {{ $notifications->count() }}
+                                </span>
+                            @endif
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" 
+                             class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-4 z-50">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Stock Alerts</h3>
+                            <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                                @forelse($notifications ?? [] as $note)
+                                    <a href="{{ route('products.show', $note) }}" class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-xl transition-all group">
+                                        <div class="size-8 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 font-bold text-xs group-hover:bg-amber-500 group-hover:text-white transition-all">
+                                            {{ $note->stock }}
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-bold text-slate-900 leading-tight">{{ $note->name }}</p>
+                                            <p class="text-[10px] text-slate-500 font-medium tracking-tight">Low Stock Alert • {{ $note->category }}</p>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="py-12 text-center">
+                                        <p class="text-sm text-slate-400 italic">No active alerts.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center gap-3 p-1 pr-3 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100">
+                            <div class="h-8 w-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                            </div>
+                            <div class="text-left hidden sm:block">
+                                <p class="text-xs font-bold text-slate-900 leading-none">{{ auth()->user()->name }}</p>
+                                <p class="text-[10px] text-slate-500 font-medium capitalize">{{ auth()->user()->role }}</p>
+                            </div>
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" 
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 py-2 z-50">
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                                    </svg>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </header>

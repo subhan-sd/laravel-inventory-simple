@@ -3,10 +3,19 @@
 @section('title', 'ElectroTech Dashboard')
 
 @section('content')
-<!-- Welcome Banner -->
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-slate-900">Good Morning, Admin!</h1>
-    <p class="text-slate-500">Here's what's happening with your store today.</p>
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Good Morning, {{ auth()->user()->name }}!</h1>
+        <p class="text-slate-500 text-sm">Welcome back to your ElectroTech Portal.</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ route('export.sales') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 text-slate-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Export Sales Report
+        </a>
+    </div>
 </div>
 
 <!-- Stats Grid -->

@@ -12,7 +12,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Products
+        $this->call([
+            UserSeeder::class,
+        ]);
+
+        // Seed Products
         DB::table('products')->insert([
             ['name' => 'iPhone 13', 'description' => 'Apple smartphone with A15 Bionic chip', 'price' => 12999000.00, 'stock' => 10, 'category' => 'Smartphone', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Samsung Galaxy S21', 'description' => 'Flagship Samsung smartphone', 'price' => 11999000.00, 'stock' => 8, 'category' => 'Smartphone', 'created_at' => now(), 'updated_at' => now()],

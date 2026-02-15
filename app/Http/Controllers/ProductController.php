@@ -89,6 +89,31 @@ class ProductController extends Controller
             ->with('success', 'Stock adjusted successfully.');
     }
 
+    public function adjustPrice(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        $oldPrice = $product->price;
+        $newPrice = $validated['price'];
+
+        if ($oldPrice != $newPrice) {
+            \App\Models\PriceHistory::create([
+                'product_id' => $product->id,
+                'old_price' => $oldPrice,
+                'new_price' => $newPrice,
+                'user_id' => auth()->id(),
+            ]);
+
+            $product->update(['price' => $newPrice]);
+
+            return back()->with('success', 'Price adjusted successfully.');
+        }
+
+        return back()->with('info', 'New price is same as current price.');
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -110,7 +135,17 @@ class ProductController extends Controller
             'category' => 'nullable|string|max:255',
         ]);
 
+        $oldPrice = $product->price;
         $product->update($validated);
+
+        if ($oldPrice != $validated['price']) {
+            \App\Models\PriceHistory::create([
+                'product_id' => $product->id,
+                'old_price' => $oldPrice,
+                'new_price' => $validated['price'],
+                'user_id' => auth()->id(),
+            ]);
+        }
 
         return redirect()->route('products.index')
             ->with('success', 'Product updated successfully.');
